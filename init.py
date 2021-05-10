@@ -9,7 +9,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader, random_split
 import sklearn.datasets
-from sklearn.model_selection import test_train_split
+from sklearn.model_selection import train_test_split
 import pylab as plt
 import pickle
 

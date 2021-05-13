@@ -12,7 +12,9 @@ Intended for train/test set of particle images.
 data_file = '5x5.pkl'
 
 # input dims, hidden layer, output
-D_in, H, D_out = 25, 8, 25
+D_in, H1, H2 = 25, 8, 2
+H3 = H1
+D_out = D_in
 
 testSetSize = 0.10
 
@@ -31,10 +33,11 @@ x = torch.FloatTensor(X_train)
 y = torch.FloatTensor(Y_train)
 
 model = torch.nn.Sequential(
-    torch.nn.Linear(D_in,H),
+    torch.nn.Linear(D_in,H1),
+    torch.nn.Linear(H1,H2),
     torch.nn.ReLU(),
-    torch.nn.Linear(H,D_out),
-    torch.nn.ReLU(),
+    torch.nn.Linear(H2,H3),
+    torch.nn.Linear(H3,D_out),
     )
 loss_fn = torch.nn.MSELoss()
 

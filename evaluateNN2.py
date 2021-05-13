@@ -6,8 +6,8 @@ Created on Thu May  6 18:19:11 2021
 """
 
 # define data to evaluate model, must have X and Y values
-x_eval =  X_test
-y_eval = Y_test #   remove redundant axis if needed
+x_eval =  X_train
+y_eval = Y_train   #   remove redundant axis if needed
 
 # name
 eval_name = 'test set'

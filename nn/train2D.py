@@ -5,25 +5,18 @@ Created on Sat Apr 17 08:40:23 2021
 @author: priceal
 
 this is a NN that functions as a 2D classifier: input is a 2D vector which
-is determined to be in a target set or not.
+is determined to be in a target set or not
 
 """
 
-learnRate =     2.0
-macroCycles = 100
-innerCycles = 100
-Xset  = prepped
-Yset = Y
+learnRate =     1.0
+macroCycles = 50
+innerCycles = 200
 
-# training set is defined X = m x n*n array of m samples, Y = m dimensional
+# training set is defined X = m x 2 array of m samples, Y = m dimensional
 # array with classification either 1/0 or True/False
-m,dx,dy = len(Yset),5,5      # number of samples
-ytrain = Yset[np.newaxis,:].astype(int)
-X = Xset
-YPOS = ytrain == 1
-actualHits = ytrain.sum()
-actualMisses = m-actualHits
-
+m = len(Y)           # number of samples
+ytrain = Y[np.newaxis,:]
 preFactor = learnRate/m
 
 # add a one (1) to the training data set to represent the bias term
@@ -31,29 +24,22 @@ preFactor = learnRate/m
 # arranged horixontally
 x1 = np.vstack((X.T, np.ones((1,m))))
 
-
 #define number of nodes per layer, this is fixed, but can be changed later
-n_x = dx*dy    # input layer (1), the 2D vector
-n_h = 2    # hidden layer (2), 4 hidden nodes
+n_x = 2    # input layer (1), the 2D vector
+n_h = 5   # hidden layer (2), 4 hidden nodes
 n_y = 1    # output layer (3), a single logical output
 
 # there are two weight matrices linking input-hidden, and hidder-output layer
 # initialize eight matrices
-W1 = np.random.randn(n_h,n_x+1)*1.5
-W2 = np.random.randn(n_y,n_h+1)*1.5
+W1 = np.random.randn(n_h,n_x+1)*0.1
+W2 = np.random.randn(n_y,n_h+1)*0.1
 
 print(W1)
 print(W2)
 #print(ytrain)
-
 fig,ax = plt.subplots(2)
-ax[0].cla(); ax[1].cla()
-ax[0].imshow(W1[0,:25].reshape([5,5]))
-ax[1].imshow(W1[1,:25].reshape([5,5]))
-fig.canvas.draw_idle()
-plt.pause(0.001)
-
-
+ax[0].set_aspect('equal')
+ax[1].set_aspect('equal')
 for macroIteration in range(macroCycles):
     
     for innerIteration in range(innerCycles):
@@ -74,28 +60,30 @@ for macroIteration in range(macroCycles):
         W1 = W1 - preFactor*dCdw1
         W2 = W2 - preFactor*dCdw2
 
-    print("cycle: ",(macroIteration+1)*innerCycles, 'total logloss:',ll.sum())     
-    PPOS = np.round(ypred) == 1
-    predHits = PPOS.sum()
-    predMisses = m-predHits
-    truePositives = (PPOS & YPOS).sum()
-    falsePositives = (PPOS & ~YPOS).sum()
-    trueNegatives = (~PPOS & ~YPOS).sum()
-    falseNegatives = (~PPOS & YPOS).sum()
-  
-    print('true positives', truePositives, '({:2.1f}%)'.format(100*truePositives/actualHits))
-    print('false negatives', falseNegatives, '({:2.1f}%)'.format(100*falseNegatives/actualHits))
-    print('true negatives', trueNegatives, '({:2.1f}%)'.format(100*trueNegatives/actualMisses))
-    print('false positives', falsePositives, '({:2.1f}%)'.format(100*falsePositives/actualMisses))
-    print('')
-    
-    ax[0].cla(); ax[1].cla()
-    ax[0].imshow(W1[0,:25].reshape([5,5]))
-    ax[1].imshow(W1[1,:25].reshape([5,5]))
+    print("cycle: ",(macroIteration+1)*innerCycles, 'total logloss:',ll.sum())
+    #ax[0].scatter(X[:,0],X[:,1],c=ypred,cmap=plt.cm.Spectral)
+    ax[0].scatter(X[:,0],X[:,1],c=ytrain,cmap=plt.cm.Spectral)
+    ax[1].scatter(X[:,0],X[:,1],c=np.round(ypred),cmap=plt.cm.Spectral)   
     fig.canvas.draw_idle()
     plt.pause(0.001)
 
-print('FINAL STATISTICS')
+#print(ypred)
+
+YPOS = ytrain == 1
+PPOS = np.round(ypred) == 1
+
+actualHits = ytrain.sum()
+actualMisses = m-actualHits
+
+predHits = PPOS.sum()
+predMisses = m-predHits
+
+truePositives = (PPOS & YPOS).sum()
+falsePositives = (PPOS & ~YPOS).sum()
+trueNegatives = (~PPOS & ~YPOS).sum()
+falseNegatives = (~PPOS & YPOS).sum()
+
+print('')
 print('test set contains {} positive and {} negatives'.format(actualHits,actualMisses))
 print('prediction set contains {} positive and {} negatives'.format(predHits,predMisses))
 print('')

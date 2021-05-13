@@ -28,8 +28,8 @@ X_train, X_test, Y_train, Y_test = train_test_split(
 
 # number of samples, input dims, hidden layer, output
 N, D_in, H, D_out = numPoints, 25, 2, 1
-x = torch.FloatTensor(X)
-y = torch.FloatTensor(Y[:,np.newaxis])
+x = torch.FloatTensor(X_train)
+y = torch.FloatTensor(Y_train[:,np.newaxis])
 model = torch.nn.Sequential(
     torch.nn.Linear(D_in,H),
     torch.nn.Sigmoid(),

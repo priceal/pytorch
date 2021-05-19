@@ -4,7 +4,7 @@ Created on Sat Apr 17 08:29:38 2021
 
 @author: priceal
 
-Sets up autoencoder NN to map images onto images.
+Sets up autoencoder NN 
 Intended for train/test set of particle images.
 
 """

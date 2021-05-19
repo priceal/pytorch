@@ -6,16 +6,17 @@ Created on Thu May  6 12:26:38 2021
 """
 
 # define number of reporting macrocycles and epochs per reporting cycle
-MacroCycles = 1
-InnerCycles = 1
+MacroCycles = 50
+InnerCycles = 80
 
 # optimization parameters
-learning_rate = 0.02
+learning_rate = 0.001
 optimizer = torch.optim.Adam(model.parameters(),lr=learning_rate)
 
 fig,ax = plt.subplots(1)
-ax.set_xlim([xMin, xMax])
-ax.set_ylim([yMin, yMax])
+#ax.set_xlim([xMin, xMax])
+#ax.set_ylim([yMin, yMax])
+ax.autoscale()
 y_pred = model(x_all).detach().numpy()
 ax.scatter(y_pred[:,0],y_pred[:,1])
 fig.canvas.draw_idle()

@@ -5,9 +5,9 @@ Created on Sat Apr 17 08:29:38 2021
 @author: priceal
 """
 
-data_file = '../training-data/data2.pkl'
+data_file = '../training-data/data.pkl'
 
-testSetSize = 0.25
+testSetSize = 0.2
 
 #define fully connected network structure
 H1, H2, D_out = 16, 4, 1

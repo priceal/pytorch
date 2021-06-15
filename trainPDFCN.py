@@ -6,11 +6,11 @@ Created on Thu May  6 12:26:38 2021
 """
 
 # define number of reporting macrocycles and epochs per reporting cycle
-epochs = 10000
-reporting = 500
+epochs = 100
+reporting = 10
 
 # optimization parameters
-learning_rate = 0.001
+learning_rate = 0.01
 optimizer = torch.optim.Adam(model.parameters(),lr=learning_rate)
 
 for tt in range(epochs):

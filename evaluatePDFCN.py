@@ -20,7 +20,7 @@ x_tens = torch.FloatTensor(x_eval)
 #y_tens = torch.FloatTensor(Y_train[:,np.newaxis]) #torch format
 y_pred_eval = model(x_tens)
 y_preda = y_pred_eval.detach().numpy()
-PPOS = np.round(y_preda[:,0]) == 1  # remove redundant axis
+PPOS = np.round(y_preda[:,0,0,0]) == 1  # remove redundant axis
 
 # define some stats
 actualHits = y_eval.sum()

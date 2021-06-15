@@ -12,7 +12,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, random_split
 from torch.utils.data.sampler import SubsetRandomSampler
-from torchvision import datasets, transforms
+#from torchvision import datasets, transforms
 import sklearn.datasets 
 from sklearn.model_selection import train_test_split
 import pylab as plt

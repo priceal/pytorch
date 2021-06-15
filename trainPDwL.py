@@ -10,7 +10,7 @@ epochs = 100
 reporting = 10
 
 # optimization parameters
-learning_rate = 0.001
+learning_rate = 0.01
 optimizer = torch.optim.Adam(model.parameters(),lr=learning_rate)
 
 for tt in range(epochs):

@@ -5,7 +5,7 @@ Created on Sat Apr 17 08:29:38 2021
 @author: priceal
 """
 
-data_file = '../training-data/data.pkl'
+data_file = '../training-data/nearMissData.pkl'
 
 testSetSize = 0.2
 

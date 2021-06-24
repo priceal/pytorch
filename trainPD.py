@@ -7,7 +7,7 @@ Created on Thu May  6 12:26:38 2021
 
 # define number of reporting macrocycles and epochs per reporting cycle
 epochs = 100
-reporting = 10
+reporting = 20
 
 # optimization parameters
 learning_rate = 0.01

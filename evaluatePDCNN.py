@@ -25,32 +25,32 @@ actualHits = y_eval.sum()
 actualMisses = m-actualHits
 predHits = PPOS.sum()
 predMisses = m-predHits
-truePositives = (PPOS & YPOS).sum()
-falsePositives = (PPOS & ~YPOS).sum()
-trueNegatives = (~PPOS & ~YPOS).sum()
-falseNegatives = (~PPOS & YPOS).sum()
+#truePositives = (PPOS & YPOS).sum()
+#falsePositives = (PPOS & ~YPOS).sum()
+#trueNegatives = (~PPOS & ~YPOS).sum()
+#falseNegatives = (~PPOS & YPOS).sum()
 
-#truePositives = cf[1,1]
-#falsePositives = cf[0,1]
-#trueNegatives = cf[0,0]
-#falseNegatives = cf[1,0]
-
-#cf = confusion_matrix(y_eval,PPOS)
-#print('        ','FALSE','TRUE')
-#print('NEGATIVE', cf[0,0], cf[0,1])
-#print('POSITIVE', cf[1,0], cf[1,1])
+cf = confusion_matrix(y_eval,PPOS)
+truePositives = cf[1,1]
+falsePositives = cf[0,1]
+trueNegatives = cf[0,0]
+falseNegatives = cf[1,0]
+negatives = trueNegatives + falseNegatives
+positives = truePositives + falsePositives
 
 print('')
-print('test set contains {} positive and {} negatives'.format(actualHits,actualMisses))
-print('prediction set contains {} positive and {} negatives'.format(predHits,predMisses))
+print('test set contains {} TRUE and {} FALSE'.format(actualHits,actualMisses))
+print('predictions contain {} POSITIVE and {} NEGATIVE'.format(predHits,predMisses))
 print('')
-print('true positives', truePositives, '({:2.1f}%)'.format(100*truePositives/actualHits))
-print('false negatives', falseNegatives, '({:2.1f}%)'.format(100*falseNegatives/actualHits))
-print('')
-print('true negatives', trueNegatives, '({:2.1f}%)'.format(100*trueNegatives/actualMisses))
-print('false positives', falsePositives, '({:2.1f}%)'.format(100*falsePositives/actualMisses))
-print('')
+
 print('recall {:2.1f}%'.format(100*truePositives/actualHits) )
 print('precision {:2.1f}%'.format(100*truePositives/(truePositives+falsePositives)) )
+
+print('')
+print('           CONFUSION MATRIX')
+print('           FALSE      TRUE       TOTAL')
+print('NEGATIVE   {:<10} {:<10} {:<10}'.format(trueNegatives,falseNegatives,negatives))
+print('POSITIVE   {:<10} {:<10} {:<10}'.format(falsePositives,truePositives,positives))
+print('TOTAL      {:<10} {:<10} {:<10}'.format(actualMisses,actualHits,m))
 
 

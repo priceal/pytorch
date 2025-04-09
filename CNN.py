@@ -24,13 +24,12 @@ from sklearn.metrics import confusion_matrix
 
 # setup the model/learning parameters
 batchSize = 500
-dimensions = 2
 dataRegionScale = 2.0    # spread in points
 biasSize = 0.5       # perp distance of separating plane from origin
 noiseLevel = 0.2
 LearningRate = 0.001
-numberIterations = 300
-reportCycle = 30
+numberIterations = 30
+reportCycle = 2
 
 # define normal to separating plane and bias - using gaussian trick
 # for spherically distributed direction

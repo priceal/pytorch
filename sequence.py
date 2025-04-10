@@ -51,6 +51,34 @@ def loadStructureAndSequence( files, group, Directory='' ):
            
 ###############################################################################
 
+
+# define model ###############################################################
+class cnnModel(torch.nn.Module):
+
+    def __init__(self,outChannels,kernelSize):
+        super(cnnModel, self).__init__()
+        self.layer1 = torch.nn.Conv1d(1,outChannels,kernelSize,padding='same')
+        torch.nn.init.zeros_(self.layer1.bias)
+        torch.nn.init.ones_(self.layer1.weight) 
+        
+    def forward(self, x):
+        xout = self.layer1(x)
+       
+        return xout
+    
+###############################################################################  
+
+
+
+
+
+
+
+
+
+
+
+
 '''
 ###############################################################################
 ############################# main ############################################

@@ -28,8 +28,8 @@ dimensions = 2
 dataRegionScale = 2.0    # spread in points
 biasSize = 0.5       # perp distance of separating plane from origin
 noiseLevel = 0.2
-LearningRate = 0.001
-numberIterations = 300
+LearningRate = 0.0001
+numberIterations = 200
 reportCycle = 30
 
 # define normal to separating plane and bias - using gaussian trick

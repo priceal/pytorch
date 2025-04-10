@@ -17,10 +17,107 @@ separating plane normal chosen randomly and displaced from origin
 randomly
 """
 
+
+
+
+
+
+
+
+
+
+
+
+
+import os
 import numpy as np
+import matplotlib.pyplot as plt
 import torch
-import pylab as plt
 from sklearn.metrics import confusion_matrix
+
+
+'''
+###############################################################################
+######################### functions ###########################################
+###############################################################################
+'''
+
+def loadSequence( file, Directory='.')
+    
+    if Directory:         # use directory if given
+        file=os.path.join(Directory,file) 
+            
+    tempStructure=np.load(file)    
+    coords = []  # to receive coords from groups from one file
+    for g in group:
+        coords.append(tempStructure[g])
+        
+    # concatenate along residue atom number axis (1) and append
+    listCoords.append(np.concatenate(coords,axis=1))
+    listSeq.append(tempStructure['seq']) 
+        
+    return np.concatenate(listCoords,axis=0), \
+           np.concatenate(listSeq,axis=0)
+           
+def loadStructureAndSequence( files, group, Directory='' ):
+    
+    listCoords = []  # to receive all coords from list of files
+    listSeq = []  # to receive sequence from files
+    for f in files:   
+        if Directory:                   # use directory if given
+            f=os.path.join(Directory,f) 
+            
+        tempStructure=np.load(f)    
+        coords = []  # to receive coords from groups from one file
+        for g in group:
+            coords.append(tempStructure[g])
+            
+        # concatenate along residue atom number axis (1) and append
+        listCoords.append(np.concatenate(coords,axis=1))
+        listSeq.append(tempStructure['seq']) 
+        
+    return np.concatenate(listCoords,axis=0), \
+           np.concatenate(listSeq,axis=0)
+           
+###############################################################################
+
+'''
+###############################################################################
+############################# main ############################################
+###############################################################################
+'''
+
+if __name__ == "__main__":
+    '''
+    structure file information --- format of dictionary entries:
+        label : [ [files], {groups} ]
+    
+    label = used to label axes
+    [files] = list of .npz files for this set of structure
+    {groups} = set of subgroups of atoms to consider
+    allowed groups ...
+               proteins:   bb = backbone, sc = sidechain
+               dna:        ph = phosphate, rb = ribose, ba = base
+    
+    N.B. all .npz files under same label MUST have structure arrays of same shape!           
+    '''
+
+    # file to load
+    inputFile = 
+    # optional structure file directory, can leave undefined '' or '.'
+    fileDirectory = '../DATA/PDB/npz'
+    
+    cutoff = 0  # non-zero for a contact map with cutoff value
+    mapTitle = 'sidechain-base contacts'
+    colorMap = 'OrRd'
+    logorithmic = True    
+    
+ 
+    
+
+
+
+
 
 # setup the model/learning parameters
 batchSize = 500

@@ -54,12 +54,9 @@ def dataLoader( filePath, maxLen=800 ):
             index=" HEC".find(c) 
             code[index] = 1
             result.append(code)
-        
         classesOneHot.append( result )
        
-    x = np.array(seqsOneHot); y = np.array(classesOneHot)
-    return torch.tensor( x, dtype=torch.float32, requires_grad=True ),\
-        torch.tensor( y, dtype=torch.float32, requires_grad=True) 
+    return seqsOneHot, classesOneHot
         
 def loadSequence( file, Directory='.'):
     
@@ -199,18 +196,7 @@ if __name__ == "__main__":
     fileDirectory = 'data'
 
     x, y = dataLoader( os.path.join(fileDirectory,inputFile) ) 
- 
-    model = cnnModel()
     
-
-#    
- 
-    
- 
-    
- 
-    
- 
 '''    
     read = SeqIO.parse(os.path.join(fileDirectory,inputFile),'fasta')
     for record in read:

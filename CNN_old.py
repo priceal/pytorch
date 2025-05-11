@@ -54,6 +54,7 @@ def dataLoader( filePath, maxLen=800 ):
             index=" HEC".find(c) 
             code[index] = 1
             result.append(code)
+        
         classesOneHot.append( result )
        
     return seqsOneHot, classesOneHot

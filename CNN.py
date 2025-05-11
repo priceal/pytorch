@@ -24,8 +24,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
-from sklearn.metrics import confusion_matrix
-from Bio import SeqIO
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 '''
 ###############################################################################
@@ -57,62 +56,11 @@ def dataLoader( filePath, maxLen=800 ):
         
         classesOneHot.append( result )
        
-    x = np.array(seqsOneHot); y = np.array(classesOneHot)
+    x = np.array(seqsOneHot).swapaxes(1,2)
+    y = np.array(classesOneHot).swapaxes(1,2)
     return torch.tensor( x, dtype=torch.float32, requires_grad=True ),\
         torch.tensor( y, dtype=torch.float32, requires_grad=True) 
-        
-def loadSequence( file, Directory='.'):
-    
-    if Directory:         # use directory if given
-        file=os.path.join(Directory,file) 
-            
-    tempStructure=np.load(file)    
-    coords = []  # to receive coords from groups from one file
-    for g in group:
-        coords.append(tempStructure[g])
-        
-    # concatenate along residue atom number axis (1) and append
-    listCoords.append(np.concatenate(coords,axis=1))
-    listSeq.append(tempStructure['seq']) 
-        
-    return np.concatenate(listCoords,axis=0), \
-           np.concatenate(listSeq,axis=0)
-           
-def loadStructureAndSequence( files, group, Directory='' ):
-    
-    listCoords = []  # to receive all coords from list of files
-    listSeq = []  # to receive sequence from files
-    for f in files:   
-        if Directory:                   # use directory if given
-            f=os.path.join(Directory,f) 
-            
-        tempStructure=np.load(f)    
-        coords = []  # to receive coords from groups from one file
-        for g in group:
-            coords.append(tempStructure[g])
-            
-        # concatenate along residue atom number axis (1) and append
-        listCoords.append(np.concatenate(coords,axis=1))
-        listSeq.append(tempStructure['seq']) 
-        
-    return np.concatenate(listCoords,axis=0), \
-           np.concatenate(listSeq,axis=0)
-           
-           
-def is_protein( chain ):
-    '''
-    determines if at least 1 residue in chain is canonical AA residue type 
-    which does not code for a DNA/RNA base. Uses a set 'trick'
-
-    Args:
-        chain (str): DESCRIPTION.
-
-    Returns:
-        bool: DESCRIPTION.
-
-    '''
-    return bool( set(chain).intersection( set('RDEQHLKMFPSWYV') ) )
-
+          
 
 #######################################################################
 # create the oneHot array for the sequence
@@ -150,7 +98,7 @@ class cnnModel(torch.nn.Module):
         self.layer2 = torch.nn.Conv1d(21, 101, 101, padding='same')
         self.relu2 = torch.nn.ReLU()
 
-        self.layer3 = torch.nn.Conv1d(101, 7, 11, padding='same')
+        self.layer3 = torch.nn.Conv1d(101, 4, 11, padding='same')
         self.softMax3 = torch.nn.Softmax(dim=1)
 
     def forward(self, x):
@@ -176,7 +124,9 @@ class cnnModel(torch.nn.Module):
 '''
 
 maxLength = 800
-
+numberIterations = 100
+reportCycle = 5
+LearningRate = 0.0000001
 
 if __name__ == "__main__":
     '''
@@ -195,6 +145,7 @@ if __name__ == "__main__":
 
     # file to load
     inputFile = 'RS126.data.txt'
+    
     # optional  file directory, can leave undefined '' or '.'
     fileDirectory = 'data'
 
@@ -202,22 +153,60 @@ if __name__ == "__main__":
  
     model = cnnModel()
     
+    
+    
+    # run cycles of optimization
+    
+    ''' 
+    output is of shape (800,4), with probability of each class. training
+    data is one hot rep. I imagine what you want is something like 
+    
+    -yData*torch.log(prediction)-(1.0-yData)*torch.log(1.0-prediction) 
+    
+    
+    '''
+    
+    
+#optimizer = torch.optim.SGD(model.parameters(), lr=LearningRate)
+#lossfn = torch.nn.CrossEntropyLoss()
+plt.figure(1)
+for i in range(numberIterations):
+    prediction = model(x)
+    lossTerms = -y*torch.log(prediction)-(1.0-y)*torch.log(1.0-prediction) 
+    loss = lossTerms.sum()
+    if i%reportCycle == 0:
+        print(f'{loss = }')
+        plt.plot([i],[loss.detach().item()],'.k')
 
-#    
+    # do manual gradient descent
+    loss.backward()
+    with torch.no_grad():
+        '''
+        model.layer1.weight -= model.layer1.weight.grad*LearningRate
+        model.layer1.weight.grad.zero_()
+        '''
+        for p in model.parameters():
+            p -= p.grad*LearningRate
+            p.grad.zero_()
+
+    
+
+    #  
+    
+    # metrics
+    yCheck = np.argmax(y.detach().numpy(),axis=1).flatten()
+    pCheck = np.argmax(prediction.detach().numpy(),axis=1).flatten()
+    
+    cm = confusion_matrix( yCheck, pCheck ) 
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, \
+                                  display_labels=['_','H','E','C'])
+    
+
+    disp.plot()
+
+    plt.show()
  
     
  
     
  
-    
- 
-'''    
-    read = SeqIO.parse(os.path.join(fileDirectory,inputFile),'fasta')
-    for record in read:
-     print(f'{record.id} length = {len(record)}')    
-     print(repr(record.seq))
-     if is_protein( str(record.seq) ):
-         # terminate id at | -- simplifies id in clustering
-         print(f'    ....protein! ')
-         seq = str(record.seq)
-'''

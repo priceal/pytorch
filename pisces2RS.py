@@ -7,32 +7,43 @@ Created on Sun May 11 10:13:16 2025
 """
 
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 inputFile = 'data/2018-06-06-pdb-intersect-pisces.csv'
-outputFile = 'data/pisces150to250.data.txt'
-minLength=150
-maxLength=250
 
+minLength = 100
+maxLength = 400
+testSize = 0.15
+
+outputTest = 'data/pisces100to400.test.txt'
+outputTrain = 'data/pisces100to400.train.txt'
+
+####################################################################
 df = pd.read_csv(inputFile)
 
-print(df.columns)
+data=[]
+for entry in df.itertuples():
 
-count = 0
-with open(outputFile,'w') as f:
-    lengths=[]
-    for entry in df.itertuples():
-    
-        if entry.seq.count('*')>0:
-            continue
-        #print(entry.seq)
-        #print(entry.sst3)
-        if len(entry.seq)<minLength:
-            continue
-        if len(entry.seq)>maxLength:
-            continue
-        lengths.append(len(entry.seq))
-        f.write(entry.seq+'\n')
-        f.write(entry.sst3+'\n')
-        count += 1
-print(count)
+    if entry.seq.count('*')>0:      # reject non-standard AAs
+        continue
+    if len(entry.seq)<minLength:   # reject less than minLength
+        continue
+    if len(entry.seq)>maxLength:   # reject greater than maxLength
+        continue
+    data.append(entry.seq+'+'+entry.sst3)
 
+train, test = train_test_split(data, test_size=testSize)
+
+with open(outputTrain,'w') as f:   
+    for line in train:
+        d, l = line.split('+') 
+        f.write( d+'\n' )
+        f.write( l+'\n' )
+        
+with open(outputTest,'w') as f:   
+    for line in test:
+        d, l = line.split('+') 
+        f.write( d+'\n' )
+        f.write( l+'\n' )
+        
+         

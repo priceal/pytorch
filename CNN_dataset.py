@@ -24,6 +24,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
+from torch.utils.data import Dataset, DataLoader, random_split
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 '''
@@ -93,6 +95,36 @@ def dataLoader( filePath, maxLen=800 ):
         torch.tensor( y, dtype=torch.float32, requires_grad=True) 
           
         
+
+class dataset(Dataset):
+    """  """
+
+    def __init__(self, x, y):
+        '''
+        
+        Parameters
+        ----------
+        x : TYPE
+            DESCRIPTION.
+        y : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        '''
+        self.x = x
+        self.y = y
+
+    def __len__(self):
+        return len(self.x)
+
+    def __getitem__(self, idx):
+
+        return self.x[idx],self.y[idx]
+        
+        
         
 ###############################################################################
 class cnnModel(torch.nn.Module):
@@ -108,27 +140,18 @@ class cnnModel(torch.nn.Module):
         # input channels = number of AA's +1 for padding. pad so that
         # output is same length as input, padding character = 0
         # layer parameters = (input chans, output chans, kernel)
-        self.layer1 = torch.nn.Conv1d(in_channels=21, 
-                                      out_channels=31,
-                                      kernel_size=11, 
-                                      stride=1,
-                                      padding='same')
+        self.layer1 = torch.nn.Conv1d(21, 31, 11, padding='same')
         self.relu1 = torch.nn.ReLU()
         
         '''        
         self.layer2 = torch.nn.Conv1d(10, 21, 101, padding='same')
         self.relu2 = torch.nn.ReLU()
         '''
-        self.layer3 = torch.nn.Conv1d(in_channels=31, 
-                                      out_channels=4, 
-                                      kernel_size=51, 
-                                      stride=1,
-                                      padding='same')
+        self.layer3 = torch.nn.Conv1d(31, 4, 51, padding='same')
         self.softMax3 = torch.nn.Softmax(dim=1)
 
     def forward(self, x):
         
-        x = 
         x = self.layer1(x)
         x = self.relu1(x)
         '''        
@@ -149,22 +172,30 @@ class cnnModel(torch.nn.Module):
 if __name__ == "__main__":
 
     # learning parameters
-    maxLength = 400
-    numberIterations = 2
+    maxLength = 150
+    numberIterations = 10
     reportCycle = 1
     learningRate = 0.0000001
+    testSize = 0.15
 
     # file to load and optional file directory---can leave undefined '' or '.'
-    inputTrain = 'pisces0to50.train.txt'
-    inputTest = 'pisces0to50.test.txt'
-
+    inputFile = 'pisces50to150.data.txt'
     fileDirectory = 'data'
 
     ###########################################################################
     # load data, create model
-    xTrain, yTrain = dataLoader(os.path.join(fileDirectory,inputTrain), maxLen=maxLength)
-    xTest, yTest = dataLoader(os.path.join(fileDirectory,inputTest), maxLen=maxLength)
-
+    x, y = dataLoader(os.path.join(fileDirectory,inputFile), maxLen=maxLength)
+    data = dataset(x, y)
+    train,test = random_split(data, [0.85,0.15])
+    xTrain, yTrain = train[:][0], train[:][1]
+    xTest, yTest = test[:][0], test[:][1]
+    
+    '''
+    xTrain=x[:2000]
+    xTest=x[2000:]
+    yTrain=y[:2000]
+    yTest=y[2000:]
+    '''
     model = cnnModel()
 
     # display size of model
@@ -191,7 +222,7 @@ if __name__ == "__main__":
         loss = lossTerms.sum()
         if i%reportCycle == 0:
             print(f'{loss = }')
-            plt.plot([i],[loss.detach().item()],'.k')
+            # plt.plot([i],[loss.detach().item()],'.k')
             
         optimizer.zero_grad()
         loss.backward()
@@ -210,38 +241,27 @@ if __name__ == "__main__":
                 p -= p.grad*learningRate
                 p.grad.zero_()
         '''
-
-    plt.show()
-     
+       
     # metrics
     
     # must convert probability-logits to one-hots ---
     # convert max logit value to 1, others 0
-    print('train performance')
-    yCheck = np.argmax(yTrain.detach().numpy(),axis=1).flatten()
-    prediction = model(xTrain)
-    pCheck = np.argmax(prediction.detach().numpy(),axis=1).flatten()
-    cm = confusion_matrix( yCheck, pCheck ) 
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, \
-                                  display_labels=['_','H','E','C'])
-    disp.plot()
-    recall = np.diagonal(cm)/cm.sum(axis=1)
-    precision = np.diagonal(cm)/cm.sum(axis=0)
-    print('class\trecall\tprecision')
-    for n,r,p in zip(['_','H','E','C'],recall,precision):
-        print(f'{n:<5}\t{r:<5.4}\t{p:<5.4}')
-        
+    yCheck = np.argmax(data.y.detach().numpy(),axis=1).flatten()
+    predictionTest = model(data.x)
+    pCheck = np.argmax(predictionTest.detach().numpy(),axis=1).flatten()
     
-    print('\ntest performance')
-    yCheck = np.argmax(yTest.detach().numpy(),axis=1).flatten()
-    prediction = model(xTest)
-    pCheck = np.argmax(prediction.detach().numpy(),axis=1).flatten()
     cm = confusion_matrix( yCheck, pCheck ) 
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, \
                                   display_labels=['_','H','E','C'])
+    
+
     disp.plot()
+
+    plt.show()
+ 
     recall = np.diagonal(cm)/cm.sum(axis=1)
     precision = np.diagonal(cm)/cm.sum(axis=0)
+    
     print('class\trecall\tprecision')
     for n,r,p in zip(['_','H','E','C'],recall,precision):
         print(f'{n:<5}\t{r:<5.4}\t{p:<5.4}')

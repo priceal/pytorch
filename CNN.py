@@ -32,9 +32,11 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 ###############################################################################
 '''
 #######################################################################
-def oneHot( string, vocab=" ARNDCEQGHILKMFPSTWYV" ):
+def oneHot( string, vocab="ARNDCEQGHILKMFPSTWYV " ):
     '''
-    create the one-hot array for the string. 
+    create the one-hot array for the string. Any un-recognized character will
+    return as a 'space' or the last character in vocab due to .find() returning
+    -1
 
     Args:
         string (TYPE): DESCRIPTION.
@@ -77,12 +79,12 @@ def dataLoader( filePath, maxLen=800 ):
     # uniform lengths = maxLen, left justified
     seqsOneHot = []
     for sequence in sequences:
-        sequence = f'{sequence[:maxLen]:<{maxLen}}' # cut-off to maxLe
-        seqsOneHot.append( oneHot(sequence, vocab=" ARNDCEQGHILKMFPSTWYV") )
+        sequence = f'{sequence[:maxLen]:^{maxLen}}' # cut-off to maxLe
+        seqsOneHot.append( oneHot(sequence, vocab="ARNDCEQGHILKMFPSTWYV ") )
     classesOneHot = []
     for clss in classes:
-        clss = f'{clss[:maxLen]:<{maxLen}}' # cut-off to maxLen
-        classesOneHot.append( oneHot(clss, vocab=" HEC") )
+        clss = f'{clss[:maxLen]:^{maxLen}}' # cut-off to maxLen
+        classesOneHot.append( oneHot(clss, vocab="HEC ") )
        
     # arrange in arrays of shape (Nseqs(0),Nclasses(1),maxLen(2)) -needed for CNN
     x = np.array(seqsOneHot).swapaxes(1,2)
@@ -128,7 +130,7 @@ class cnnModel(torch.nn.Module):
 
     def forward(self, x):
         
-        x = 
+#        x = 
         x = self.layer1(x)
         x = self.relu1(x)
         '''        
@@ -150,13 +152,13 @@ if __name__ == "__main__":
 
     # learning parameters
     maxLength = 400
-    numberIterations = 2
-    reportCycle = 1
-    learningRate = 0.0000001
+    numberIterations = 200
+    reportCycle = 10
+    learningRate = 0.00000001
 
     # file to load and optional file directory---can leave undefined '' or '.'
-    inputTrain = 'pisces0to50.train.txt'
-    inputTest = 'pisces0to50.test.txt'
+    inputTrain = 'pisces100to400.train.txt'
+    inputTest  = 'pisces100to400.test.txt'
 
     fileDirectory = 'data'
 
@@ -223,13 +225,13 @@ if __name__ == "__main__":
     pCheck = np.argmax(prediction.detach().numpy(),axis=1).flatten()
     cm = confusion_matrix( yCheck, pCheck ) 
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, \
-                                  display_labels=['_','H','E','C'])
+                                  display_labels=['H','E','C','_'])
     disp.plot()
     recall = np.diagonal(cm)/cm.sum(axis=1)
     precision = np.diagonal(cm)/cm.sum(axis=0)
-    print('class\trecall\tprecision')
-    for n,r,p in zip(['_','H','E','C'],recall,precision):
-        print(f'{n:<5}\t{r:<5.4}\t{p:<5.4}')
+    print('{:10} {:10} {:10}'.format('class','recall','precision') )
+    for n,r,p in zip(['H','E','C','_'],recall,precision):
+        print(f'{n:<10} {r:<10.4} {p:<10.4}')
         
     
     print('\ntest performance')
@@ -238,13 +240,13 @@ if __name__ == "__main__":
     pCheck = np.argmax(prediction.detach().numpy(),axis=1).flatten()
     cm = confusion_matrix( yCheck, pCheck ) 
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, \
-                                  display_labels=['_','H','E','C'])
+                                  display_labels=['H','E','C','_'])
     disp.plot()
     recall = np.diagonal(cm)/cm.sum(axis=1)
     precision = np.diagonal(cm)/cm.sum(axis=0)
-    print('class\trecall\tprecision')
-    for n,r,p in zip(['_','H','E','C'],recall,precision):
-        print(f'{n:<5}\t{r:<5.4}\t{p:<5.4}')
+    print('{:10} {:10} {:10}'.format('class','recall','precision') )
+    for n,r,p in zip(['H','E','C','_'],recall,precision):
+        print(f'{n:10} {r:<10.4} {p:<10.4}')
         
     
  

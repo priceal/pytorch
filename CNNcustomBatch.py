@@ -158,42 +158,6 @@ def batchReader(filePath, maxLen=1000, minLen=0):
 
     return seqDict, tarDict
  
- 
-
-
-
-
-
-#######################################################################
-
-
-class seqDataset(Dataset):
-    """  """
-
-    def __init__(self, x, y):
-        '''
-
-        Parameters
-        ----------
-        x : TYPE
-            DESCRIPTION.
-        y : TYPE
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
-
-        '''
-        self.x = x
-        self.y = y
-
-    def __len__(self):
-        return len(self.x)
-
-    def __getitem__(self, idx):
-
-        return self.x[idx], self.y[idx]
 
 
 ###############################################################################
@@ -254,8 +218,6 @@ if __name__ == "__main__":
 
     # learning parameters
     maxLength = 400
-    numBatches = 0  # if non-zero, ignore batchSize and set to N/numBatches
-    batchSize = 1  # only use if numBatches = 0
     numberEpochs = 1
     reportCycle = 100
     learningRate = 0.0000001
@@ -268,11 +230,11 @@ if __name__ == "__main__":
     ###########################################################################
 
     # load data
-    xTest, yTest = dataReader(os.path.join(
+    xTestDict, yTestDict = batchReader(os.path.join(
         fileDirectory, inputTest), maxLen=maxLength)
-    xTrain, yTrain = dataReader(os.path.join(
+    xTrainDict, yTrainDict = dataReader(os.path.join(
         fileDirectory, inputTrain), maxLen=maxLength)
-    dataTrain = seqDataset(xTrain, yTrain)
+
 
     print("DATA SET ")
     rows = ['training data', 'training labels', 'test data', 'test labels']
@@ -282,12 +244,6 @@ if __name__ == "__main__":
     for r, d in zip(rows, ds):
         a, b, c = d.shape
         print(f"{r:<20} {a:<15} {b:<15} {c:<15}")
-
-    if numBatches > 0:
-        batchSize = int(len(xTrain)/numBatches)
-    dataloader = DataLoader(dataTrain, batch_size=batchSize, shuffle=True)
-    print('number of batches:', numBatches)
-    print('size of batches:', batchSize)
 
     # create model
     model = cnnModel()
@@ -310,18 +266,17 @@ if __name__ == "__main__":
     stepCount = 0
     for i in range(numberEpochs):
 
-        for j, batch in enumerate(dataloader):
+        for key in xTrainDict.keys():
+            
+            xBatch = xTrainDict[key]
+            yBatch = yTrainDict[key]
+            
 
             # calculate and display loss, then back propagate
-            
-            # trim to length of sequence, only works for batch size 1 !!
-            sampleLength = int(batch[0].sum())
-            xx=batch[0][:,:,:sampleLength]
-            yy=batch[1][:,:,:sampleLength]
-            
-            prediction = model(xx)
+              
+            prediction = model(xBatch)
             lossTerms = - \
-                yy*torch.log(prediction)-(1.0-yy) * \
+                yBatch*torch.log(prediction)-(1.0-yBatch) * \
                 torch.log(1.0-prediction)
             loss = lossTerms.sum()
             

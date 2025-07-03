@@ -11,17 +11,23 @@ from sklearn.model_selection import train_test_split
 
 inputFile = 'data/2018-06-06-pdb-intersect-pisces.csv'
 
-minLength = 100
-maxLength = 400
+minLength = 0
+maxLength = 40
 testSize = 0.15
 
-outputTest = 'data/pisces100to400.test.txt'
-outputTrain = 'data/pisces100to400.train.txt'
+#outputTest = 'data/pisces100to400.test.txt'
+#outputTrain = 'data/pisces100to400.train.txt'
+
+
+outputTest = 'temp.test.txt'
+outputTrain = 'temp.train.txt'
 
 ####################################################################
 df = pd.read_csv(inputFile)
 
 data=[]
+dataDict={}
+lengthDict={}
 for entry in df.itertuples():
 
     if entry.seq.count('*')>0:      # reject non-standard AAs
@@ -31,6 +37,13 @@ for entry in df.itertuples():
     if len(entry.seq)>maxLength:   # reject greater than maxLength
         continue
     data.append(entry.seq+'+'+entry.sst3)
+    print(len(entry.seq))
+    if len(entry.seq) not in lengthDict.keys():
+        lengthDict[len(entry.seq)] = 1
+    else:
+        lengthDict[len(entry.seq)] += 1
+   
+ 
 
 train, test = train_test_split(data, test_size=testSize)
 

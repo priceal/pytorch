@@ -201,9 +201,10 @@ if __name__ == "__main__":
     cropSize = 100  # crop/pad all accepted seqs to this length
     numBatches = 1  # if non-zero, ignore batchSize and set to N/numBatches
     batchSize = 0  # only use if numBatches = 0
-    numberEpochs = 100
+    numberEpochs = 2
     reportCycle = 1
     learningRate = 0.0000001
+   # classWeights = ( 0.8, 1.4, 0.7 )  # (H, E, C)
     classWeights = ( 2.975837 , 4.283632 , 2.3228085 )  # (H, E, C)
    
     # file to load and optional file directory---can leave undefined '' or '.'
@@ -255,68 +256,4 @@ if __name__ == "__main__":
     ww=np.ones([nClasses,nLengths])*np.array(classWeights)[:,np.newaxis]
     weights = torch.tensor(ww)
 
-    # run cycles of optimization
-    plt.figure(1)
-    optimizer = torch.optim.SGD(model.parameters(), lr=learningRate)
-    print('\nOPTIMIZATION')
-    print('{:10} {:10} {:10} {:10}'.format('epoch','batch','loss-train','loss-test') )
-    stepCount = 0
-    for i in range(numberEpochs):
-        for j, batch in enumerate(dataloader):
-            
-            # calculate and display loss, then back propagate
-            xx, yy = batch[0], batch[1]
-            prediction = model(xx)
-            lossTerms = -yy*torch.log(prediction)*weights
-            loss = lossTerms.sum()
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            
-            if stepCount % reportCycle == 0:
-                print(f"{i:<10} {j:<10} {loss.item():<10.5}")
-                plt.plot([stepCount], [loss.item()], '.k')
-            
-            stepCount += 1
-    
-    plt.show()
-    
-    # metrics
-    
-    # must convert probability-logits to one-hots ---
-    # convert max logit value to 1, others 0
-    targetLabels = ['H', 'E', 'C']
-    print('\nFINAL METRICS')
-    print('training set performance')
-    yCheck = np.argmax(yTrain.detach().numpy(), axis=1).flatten()
-    prediction = model(xTrain)
-    pCheck = np.argmax(prediction.detach().numpy(), axis=1).flatten()
-    cm = confusion_matrix(yCheck, pCheck)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm,
-                                  display_labels=targetLabels)
-    disp.plot()
-    recall = np.diagonal(cm)/cm.sum(axis=1)
-    precision = np.diagonal(cm)/cm.sum(axis=0)
-    print('{:10} {:10} {:10}'.format('class', 'recall', 'precision'))
-    for n, r, p in zip(targetLabels, recall, precision):
-        print(f'{n:<10} {r:<10.4} {p:<10.4}')
-    
-    labelCounts = cm.sum(axis=1)
-    print('label','count','fraction')
-    for i,tl in enumerate(targetLabels):
-        print(tl,labelCounts[i],labelCounts[i]/labelCounts.sum())
-'''
-    print('\ntest set performance')
-    yCheck = np.argmax(yTest.detach().numpy(), axis=1).flatten()
-    prediction = model(xTest)
-    pCheck = np.argmax(prediction.detach().numpy(), axis=1).flatten()
-    cm = confusion_matrix(yCheck, pCheck)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm,
-                                  display_labels=['H', 'E', 'C'])
-    disp.plot()
-    recall = np.diagonal(cm)/cm.sum(axis=1)
-    precision = np.diagonal(cm)/cm.sum(axis=0)
-    print('{:10} {:10} {:10}'.format('class', 'recall', 'precision'))
-    for n, r, p in zip(['H', 'E', 'C'], recall, precision):
-        print(f'{n:10} {r:<10.4} {p:<10.4}')
-'''
+

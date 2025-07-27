@@ -11,16 +11,14 @@ from sklearn.model_selection import train_test_split
 
 inputFile = 'data/2018-06-06-pdb-intersect-pisces.csv'
 
-minLength = 0
-maxLength = 40
-testSize = 0.15
+minLength = 100
+maxLength = 400
+testSize = 0.10
+valSize = 0.10
 
-#outputTest = 'data/pisces100to400.test.txt'
-#outputTrain = 'data/pisces100to400.train.txt'
-
-
-outputTest = 'temp.test.txt'
-outputTrain = 'temp.train.txt'
+outputTrain = 'data/pisces100to400.train.txt'
+outputVal = 'data/pisces100to400.val.txt'
+outputTest = 'data/pisces100to400.test.txt'
 
 ####################################################################
 df = pd.read_csv(inputFile)
@@ -37,15 +35,14 @@ for entry in df.itertuples():
     if len(entry.seq)>maxLength:   # reject greater than maxLength
         continue
     data.append(entry.seq+'+'+entry.sst3)
-    print(len(entry.seq))
+ #   print(len(entry.seq))
     if len(entry.seq) not in lengthDict.keys():
         lengthDict[len(entry.seq)] = 1
     else:
         lengthDict[len(entry.seq)] += 1
-   
  
-
-train, test = train_test_split(data, test_size=testSize)
+train, val_test = train_test_split(data, test_size=testSize+valSize)
+val, test = train_test_split( val_test, test_size=(testSize/(testSize+valSize)))
 
 with open(outputTrain,'w') as f:   
     for line in train:
@@ -53,6 +50,12 @@ with open(outputTrain,'w') as f:
         f.write( d+'\n' )
         f.write( l+'\n' )
         
+with open(outputVal,'w') as f:   
+        for line in val:
+            d, l = line.split('+') 
+            f.write( d+'\n' )
+            f.write( l+'\n' )
+                
 with open(outputTest,'w') as f:   
     for line in test:
         d, l = line.split('+') 

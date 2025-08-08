@@ -154,20 +154,20 @@ class cnnModel(torch.nn.Module):
         # output is same length as input, padding character = 0
         # layer parameters = (input chans, output chans, kernel)
         self.layer1 = torch.nn.Conv1d(in_channels=20,
-                                      out_channels=64,
+                                      out_channels=11,
                                       kernel_size=11,
                                       stride=1,
                                       padding='same')
         self.relu1 = torch.nn.ReLU()
 
-        self.layer2 = torch.nn.Conv1d(in_channels=64,
-                                      out_channels=32,
-                                      kernel_size=31,
+        self.layer2 = torch.nn.Conv1d(in_channels=11,
+                                      out_channels=11,
+                                      kernel_size=11,
                                       stride=1,
                                       padding='same')
         self.relu2 = torch.nn.ReLU()
 
-        self.layer3 = torch.nn.Conv1d(in_channels=32,
+        self.layer3 = torch.nn.Conv1d(in_channels=11,
                                       out_channels=3,
                                       kernel_size=11,
                                       stride=1,
@@ -201,9 +201,9 @@ if __name__ == "__main__":
     cropSize = 100  # crop/pad all accepted seqs to this length
     numBatches = 1  # if non-zero, ignore batchSize and set to N/numBatches
     batchSize = 0  # only use if numBatches = 0
-    numberEpochs = 100
+    numberEpochs = 5
     reportCycle = 1
-    learningRate = 0.0000001
+    learningRate = 5.0
     classWeights = ( 2.975837 , 4.283632 , 2.3228085 )  # (H, E, C)
    
     # file to load and optional file directory---can leave undefined '' or '.'
@@ -268,7 +268,8 @@ if __name__ == "__main__":
             xx, yy = batch[0], batch[1]
             prediction = model(xx)
             lossTerms = -yy*torch.log(prediction)*weights
-            loss = lossTerms.sum()
+            loss = lossTerms.sum()/yy.shape.numel()
+#            loss = lossTerms.sum()
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
